@@ -34,6 +34,7 @@ from tomoxrd.widget import (
     FilenameSettingsWidget,
     CollectionSettingsWidget,
     CollectionPointsWidget,
+    CollectionStatusWidget,
 )
 
 
@@ -52,6 +53,7 @@ class MainWidget(QMainWindow):
         self.filename_settings = FilenameSettingsWidget(paths=self._paths)
         self.collection_settings = CollectionSettingsWidget(paths=self._paths)
         self.collection_points = CollectionPointsWidget(paths=self._paths)
+        self.collection_status = CollectionStatusWidget(paths=self._paths)
 
         # Event helpers
         self._terminated: bool = False
@@ -66,6 +68,7 @@ class MainWidget(QMainWindow):
         layout.addWidget(self.filename_settings, 0, 0, 1, 1)
         layout.addWidget(self.collection_settings, 0, 1, 1, 1)
         layout.addWidget(self.collection_points, 1, 0, 1, 2)
+        layout.addWidget(self.collection_status, 2, 0, 1, 2)
 
         layout.setRowStretch(1, 1)
         layout.setColumnStretch(1, 1)
