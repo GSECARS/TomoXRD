@@ -18,4 +18,5 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # ----------------------------------------------------------------------
 
+from tomoxrd.widget.filename_settings_widget import FilenameSettingsWidget
 from tomoxrd.widget.main_widget import MainWidget

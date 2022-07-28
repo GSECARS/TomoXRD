@@ -25,11 +25,12 @@ from qtpy.QtWidgets import (
     QMainWindow,
     QMessageBox,
     QFrame,
-    QVBoxLayout,
+    QGridLayout,
 )
 from typing import Optional
 
 from tomoxrd.model import PathModel
+from tomoxrd.widget import FilenameSettingsWidget
 
 
 class MainWidget(QMainWindow):
@@ -44,6 +45,7 @@ class MainWidget(QMainWindow):
         self._paths = paths
 
         self._central_widget = QFrame()
+        self.filename_settings = FilenameSettingsWidget(paths=self._paths)
 
         # Event helpers
         self._terminated: bool = False
@@ -54,7 +56,12 @@ class MainWidget(QMainWindow):
 
     def _configure_main_frame(self) -> None:
         """Configures the main frame widget (central widget)."""
-        layout = QVBoxLayout()
+        layout = QGridLayout()
+        layout.addWidget(self.filename_settings, 0, 1)
+
+        layout.setRowStretch(1, 1)
+        layout.setColumnStretch(0, 1)
+        layout.setColumnStretch(2, 1)
 
         self._central_widget.setLayout(layout)
 
