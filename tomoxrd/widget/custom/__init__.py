@@ -24,3 +24,4 @@ from tomoxrd.widget.custom.buttons import AbstractFlatButton, FileBrowserButton
 from tomoxrd.widget.custom.comboboxes import AbstractComboBox
 from tomoxrd.widget.custom.spinboxes import NumberSpinBox, NoWheelNumberSpinBox
 from tomoxrd.widget.custom.input_boxes import AbstractInputBox
+from tomoxrd.widget.custom.tables import AbstractTableWidget

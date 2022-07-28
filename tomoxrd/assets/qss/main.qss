@@ -100,3 +100,55 @@ QLabel {
     font-family: "Calibri";
     font-weight: bold;
 }
+
+QScrollBar:horizontal {
+    background-color: #9dceed;
+    border: none;
+	height: 10 px;
+    margin: 0px;
+}
+
+QScrollBar:vertical {
+    background-color: #9dceed;
+    border: none;
+	width: 10 px;
+    margin: 0px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #7ea8c4;
+    border-radius: 4px;
+    min-width: 20px;
+    padding: 15px;
+}
+
+QScrollBar::handle:vertical {
+    background: #7ea8c4;
+    border-radius: 4px;
+    min-width: 20px;
+    padding: 15px;
+}
+
+QScrollBar::add-line:horizontal {
+    border: none;
+    height: 0px;
+}
+
+QScrollBar::add-line:vertical {
+    border: none;
+    width: 0px;
+}
+
+QScrollBar::sub-line:horizontal {
+    border: none;
+    height: 0px;
+}
+
+QScrollBar::sub-line:vertical {
+    border: none;
+    width: 0px;
+}
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal, QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: none;
+}

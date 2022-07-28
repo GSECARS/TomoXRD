@@ -30,7 +30,7 @@ from qtpy.QtWidgets import (
 from typing import Optional
 
 from tomoxrd.model import PathModel
-from tomoxrd.widget import FilenameSettingsWidget, CollectionSettingsWidget
+from tomoxrd.widget import FilenameSettingsWidget, CollectionSettingsWidget, CollectionPointsWidget
 
 
 class MainWidget(QMainWindow):
@@ -47,6 +47,7 @@ class MainWidget(QMainWindow):
         self._central_widget = QFrame()
         self.filename_settings = FilenameSettingsWidget(paths=self._paths)
         self.collection_settings = CollectionSettingsWidget(paths=self._paths)
+        self.collection_points = CollectionPointsWidget(paths=self._paths)
 
         # Event helpers
         self._terminated: bool = False
@@ -58,8 +59,9 @@ class MainWidget(QMainWindow):
     def _configure_main_frame(self) -> None:
         """Configures the main frame widget (central widget)."""
         layout = QGridLayout()
-        layout.addWidget(self.filename_settings, 0, 0)
-        layout.addWidget(self.collection_settings, 0, 1)
+        layout.addWidget(self.filename_settings, 0, 0, 1, 1)
+        layout.addWidget(self.collection_settings, 0, 1, 1, 1)
+        layout.addWidget(self.collection_points, 1, 0, 1, 2)
 
         layout.setRowStretch(1, 1)
         layout.setColumnStretch(1, 1)
