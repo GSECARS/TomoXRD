@@ -59,7 +59,7 @@ class FilenameSettingsWidget(QGroupBox):
             "···", size=QSize(25, 22), object_name="btn-filename-settings"
         )
         self.flb_calibration = FileBrowserButton(
-            "Load Calibration", size=QSize(200, 22), object_name="btn-filename-settings"
+            "Load Calibration", signle_file=True, size=QSize(200, 22), object_name="btn-filename-settings"
         )
 
         # Spin boxes

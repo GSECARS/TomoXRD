@@ -75,6 +75,7 @@ class FileBrowserButton(AbstractFlatButton):
     def __init__(
         self,
         text: Optional[str] = None,
+        signle_file: Optional[bool] = False,
         size: Optional[QSize] = None,
         object_name: Optional[str] = "abstract-button",
     ) -> None:
@@ -84,6 +85,8 @@ class FileBrowserButton(AbstractFlatButton):
             object_name=object_name,
         )
 
+        self._single_file = signle_file
+
     def _button_click_event(self) -> None:
         """
         Uses QFileDialog to get the selected path and clears the focus state of the button.
@@ -91,5 +94,19 @@ class FileBrowserButton(AbstractFlatButton):
         # Clear the focus state
         self.clearFocus()
 
+        file_path = None
+        folder_path = None
+
         # Open file dialog
-        folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
+        if not self._single_file:
+            folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
+        else:
+            dialog = QFileDialog()
+            dialog.setFileMode(QFileDialog.ExistingFile)
+            options = QFileDialog.Options()
+            file_path, _ = QFileDialog.getOpenFileName(
+                parent=self,
+                caption="Select Calibration File",
+                filter="Par File (*.par)",
+                options=options
+            )
