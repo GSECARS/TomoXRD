@@ -21,6 +21,7 @@
 import os
 from qtpy.QtCore import QSize, Qt
 from qtpy.QtWidgets import QWidget, QGridLayout
+from typing import Optional
 
 from tomoxrd.model import PathModel
 from tomoxrd.widget.custom import AbstractLabel, AbstractFlatButton
@@ -49,6 +50,80 @@ class CollectionStatusWidget(QWidget):
 
         self._configure_collection_status_widgets()
         self._layout_collection_status()
+
+    def toggle_collect_abort_button(self, state: Optional[str] = "collect") -> None:
+        """Toggles the style to account for collect and abort."""
+        if state == "collect":
+            self.btn_collect_abort.setText("Collect")
+            self.btn_collect_abort.setStyleSheet(
+                """
+                QPushButton {
+                    background: #9dedca;
+                    border: 2px solid #9dedca;
+                    color: #323336;
+                    font-size: 16px;
+                    padding: 1px 5px;
+                }
+                QPushButton:hover, QPushButton:focus, QPushButton:pressed {
+                    background-color: #71ab91;
+                    border-color: #71ab91;
+                }
+                """
+            )
+        else:
+            self.btn_collect_abort.setText("Abort")
+            self.btn_collect_abort.setStyleSheet(
+                """
+                QPushButton {
+                    background: #99232f;
+                    border: 2px solid #99232f;
+                    color: #d5dde3;
+                    font-size: 16px;
+                    padding: 1px 5px;
+                }
+                QPushButton:hover, QPushButton:focus, QPushButton:pressed {
+                    background-color: #731e26;
+                    border-color: #731e26;
+                }
+                """
+            )
+
+    def toggle_prepare_method_button(self, state: Optional[str] = "tomo") -> None:
+        """Toggles the style to account for tomo and xrd methods."""
+        if state == "tomo":
+            self.btn_prepare_for_method.setText("Prepare for Tomo")
+            self.btn_prepare_for_method.setStyleSheet(
+                """
+                QPushButton {
+                    background: #9dedca;
+                    border: 2px solid #9dedca;
+                    color: #323336;
+                    font-size: 16px;
+                    padding: 1px 5px;
+                }
+                QPushButton:hover, QPushButton:focus, QPushButton:pressed {
+                    background-color: #71ab91;
+                    border-color: #71ab91;
+                }
+                """
+            )
+        else:
+            self.btn_prepare_for_method.setText("Prepare for XRD")
+            self.btn_prepare_for_method.setStyleSheet(
+                """
+                QPushButton {
+                    background: #143d5c;
+                    border: 2px solid #143d5c;
+                    color: #d5dde3;
+                    font-size: 16px;
+                    padding: 1px 5px;
+                }
+                QPushButton:hover, QPushButton:focus, QPushButton:pressed {
+                    background-color: #132f45;
+                    border-color: #132f45;
+                }
+                """
+            )
 
     def _configure_collection_status_widgets(self) -> None:
         # Load the qss file
