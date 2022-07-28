@@ -37,17 +37,25 @@ class CollectionPointsWidget(QGroupBox):
         self._paths = paths
 
         # Buttons
-        self.btn_add = AbstractFlatButton("Add", size=QSize(85, 22), object_name="btn-points")
-        self.btn_delete = AbstractFlatButton("Delete", size=QSize(85, 22), object_name="btn-points")
-        self.btn_clear = AbstractFlatButton("Clear", size=QSize(85, 22), object_name="btn-points")
-        self.btn_check_all = AbstractFlatButton("Check all", size=QSize(85, 22), object_name="btn-points")
+        self.btn_add = AbstractFlatButton(
+            "Add", size=QSize(85, 22), object_name="btn-points"
+        )
+        self.btn_delete = AbstractFlatButton(
+            "Delete", size=QSize(85, 22), object_name="btn-points"
+        )
+        self.btn_clear = AbstractFlatButton(
+            "Clear", size=QSize(85, 22), object_name="btn-points"
+        )
+        self.btn_check_all = AbstractFlatButton(
+            "Check all", size=QSize(85, 22), object_name="btn-points"
+        )
 
         # Tables
         self.table_points = AbstractTableWidget(
             columns=5,
             horizontal_headers=["Name", "X", "Y", "Z", "Enabled"],
             column_stretch=0,
-            object_name="table-points"
+            object_name="table-points",
         )
 
         self._configure_collection_points_groupbox()

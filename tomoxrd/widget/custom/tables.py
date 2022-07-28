@@ -19,7 +19,15 @@
 # ----------------------------------------------------------------------
 
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QWidget, QTableWidget, QAbstractItemView, QHeaderView, QTableWidgetItem, QCheckBox, QHBoxLayout
+from qtpy.QtWidgets import (
+    QWidget,
+    QTableWidget,
+    QAbstractItemView,
+    QHeaderView,
+    QTableWidgetItem,
+    QCheckBox,
+    QHBoxLayout,
+)
 from typing import Optional
 
 from tomoxrd.widget.custom import AbstractLabel, AbstractInputBox
@@ -31,12 +39,12 @@ class AbstractTableWidget(QTableWidget):
     """
 
     def __init__(
-            self,
-            columns: Optional[int] = None,
-            rows: Optional[int] = None,
-            horizontal_headers: Optional[list] = None,
-            column_stretch: Optional[int] = None,
-            object_name: Optional[str] = "abstract-table",
+        self,
+        columns: Optional[int] = None,
+        rows: Optional[int] = None,
+        horizontal_headers: Optional[list] = None,
+        column_stretch: Optional[int] = None,
+        object_name: Optional[str] = "abstract-table",
     ) -> None:
         super(AbstractTableWidget, self).__init__()
 
@@ -74,7 +82,9 @@ class AbstractTableWidget(QTableWidget):
         # Set column stretch
         if self._column_stretch is not None:
             if self._column_stretch >= 0 and self._column_stretch <= self._columns - 1:
-                self.horizontalHeader().setSectionResizeMode(self._column_stretch, QHeaderView.Stretch)
+                self.horizontalHeader().setSectionResizeMode(
+                    self._column_stretch, QHeaderView.Stretch
+                )
 
         # Hide vertical header
         self.verticalHeader().setVisible(False)
@@ -126,4 +136,3 @@ class AbstractTableWidget(QTableWidget):
         checkbox.setChecked(True)
         checkbox.setObjectName("table-checkbox")
         self.setCellWidget(row, 4, checkbox)
-

@@ -30,7 +30,11 @@ from qtpy.QtWidgets import (
 from typing import Optional
 
 from tomoxrd.model import PathModel
-from tomoxrd.widget import FilenameSettingsWidget, CollectionSettingsWidget, CollectionPointsWidget
+from tomoxrd.widget import (
+    FilenameSettingsWidget,
+    CollectionSettingsWidget,
+    CollectionPointsWidget,
+)
 
 
 class MainWidget(QMainWindow):
