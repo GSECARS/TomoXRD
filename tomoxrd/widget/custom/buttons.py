@@ -108,5 +108,5 @@ class FileBrowserButton(AbstractFlatButton):
                 parent=self,
                 caption="Select Calibration File",
                 filter="Par File (*.par)",
-                options=options
+                options=options,
             )
