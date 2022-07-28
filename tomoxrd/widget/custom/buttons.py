@@ -92,4 +92,4 @@ class FileBrowserButton(AbstractFlatButton):
         self.clearFocus()
 
         # Open file dialog
-        folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder')
+        folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")

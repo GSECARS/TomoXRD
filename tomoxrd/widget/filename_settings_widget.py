@@ -23,7 +23,13 @@ from qtpy.QtCore import QSize, Qt
 from qtpy.QtWidgets import QGroupBox, QGridLayout, QCheckBox
 
 from tomoxrd.model import PathModel
-from tomoxrd.widget.custom import AbstractFlatButton, FileBrowserButton, AbstractLabel, AbstractInputBox, NumberSpinBox
+from tomoxrd.widget.custom import (
+    AbstractFlatButton,
+    FileBrowserButton,
+    AbstractLabel,
+    AbstractInputBox,
+    NumberSpinBox,
+)
 
 
 class FilenameSettingsWidget(QGroupBox):
@@ -46,13 +52,23 @@ class FilenameSettingsWidget(QGroupBox):
         self.ipt_path = AbstractInputBox(size=QSize(115, 22))
 
         # Buttons
-        self.btn_reset = AbstractFlatButton("Reset", size=QSize(85, 22), object_name="btn-filename-settings")
-        self.flb_path = FileBrowserButton("···", size=QSize(25, 22), object_name="btn-filename-settings")
-        self.flb_calibration = FileBrowserButton("Load Calibration", size=QSize(200, 22), object_name="btn-filename-settings")
+        self.btn_reset = AbstractFlatButton(
+            "Reset", size=QSize(85, 22), object_name="btn-filename-settings"
+        )
+        self.flb_path = FileBrowserButton(
+            "···", size=QSize(25, 22), object_name="btn-filename-settings"
+        )
+        self.flb_calibration = FileBrowserButton(
+            "Load Calibration", size=QSize(200, 22), object_name="btn-filename-settings"
+        )
 
         # Spin boxes
         self.spin_frame_number = NumberSpinBox(
-            min_value=1, max_value=100000, default_value=1, single_step=1, object_name="frame-spinbox"
+            min_value=1,
+            max_value=100000,
+            default_value=1,
+            single_step=1,
+            object_name="frame-spinbox",
         )
 
         # Check boxes
@@ -65,7 +81,9 @@ class FilenameSettingsWidget(QGroupBox):
         """Base configuration of the filename settings widgets."""
         # Load groupbox qss file
         self.setStyleSheet(
-            open(os.path.join(self._paths.qss_path, "filename_settings.qss"), "r").read()
+            open(
+                os.path.join(self._paths.qss_path, "filename_settings.qss"), "r"
+            ).read()
         )
 
         # Set groupbox title
@@ -76,12 +94,18 @@ class FilenameSettingsWidget(QGroupBox):
 
     def _layout_filename_settings(self) -> None:
         layout = QGridLayout()
-        layout.addWidget(self._lbl_filename, 0, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignRight)
+        layout.addWidget(
+            self._lbl_filename, 0, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignRight
+        )
         layout.addWidget(self.ipt_filename, 0, 1, 1, 2)
-        layout.addWidget(self._lbl_path, 1, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignRight)
+        layout.addWidget(
+            self._lbl_path, 1, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignRight
+        )
         layout.addWidget(self.ipt_path, 1, 1, 1, 2)
         layout.addWidget(self.flb_path, 1, 3, 1, 1)
-        layout.addWidget(self._lbl_frame_number, 2, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignRight)
+        layout.addWidget(
+            self._lbl_frame_number, 2, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignRight
+        )
         layout.addWidget(self.spin_frame_number, 2, 1, 1, 1)
         layout.addWidget(self.btn_reset, 2, 2, 1, 2)
         layout.addWidget(self.check_chrysalis, 3, 0, 1, 3)
