@@ -18,9 +18,33 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # ----------------------------------------------------------------------
 
-from tomoxrd.widget.custom.msg_box import MsgBox
-from tomoxrd.widget.custom.labels import AbstractLabel
-from tomoxrd.widget.custom.buttons import AbstractFlatButton, FileBrowserButton
-from tomoxrd.widget.custom.comboboxes import AbstractComboBox
-from tomoxrd.widget.custom.spinboxes import NumberSpinBox, NoWheelNumberSpinBox
-from tomoxrd.widget.custom.input_boxes import AbstractInputBox
+from qtpy.QtWidgets import QLabel
+from typing import Optional
+
+
+class AbstractLabel(QLabel):
+    """
+    Used to create instances of simple labels.
+    """
+
+    def __init__(
+        self,
+        text: Optional[str] = None,
+        object_name: Optional[str] = "abstract-label",
+    ) -> None:
+        super(AbstractLabel, self).__init__()
+
+        self._text = text
+        self._object_name = object_name
+
+        self._config_abstract_label()
+
+    def _config_abstract_label(self) -> None:
+        """Sets the basic configuration values for the abstract labels."""
+        # Set text
+        if self._text is not None:
+            self.setText(self._text)
+
+        # Set object name
+        if self._object_name is not None:
+            self.setObjectName(self._object_name)
