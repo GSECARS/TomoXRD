@@ -48,6 +48,12 @@
     selection-color: #323336;
 }
 
+#combo-collection:disabled {
+    background-color: #a7a8a7;
+    border-color: #a7a8a7;
+    color: #dbdbdb;
+}
+
 #spinbox-collection {
     background-color: #d7dde0;
     border: 2px solid #d7dde0;
@@ -60,6 +66,12 @@
 
 #spinbox-collection:focus {
     border: 2px solid #81b8db;
+}
+
+#spinbox-collection:disabled {
+    border: 2px solid #919492;
+    background-color: #919492;
+    color: #ebebeb;
 }
 
 #lbl-map {

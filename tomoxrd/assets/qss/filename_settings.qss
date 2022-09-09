@@ -31,6 +31,12 @@
     border-color: #7ea8c4;
 }
 
+#btn-filename-settings:disabled {
+    background-color: #a7a8a7;
+    border-color: #a7a8a7;
+    color: #dbdbdb;
+}
+
 #frame-spinbox {
     background-color: #d7dde0;
     border: 2px solid #d7dde0;
@@ -45,6 +51,12 @@
     border: 2px solid #81b8db;
 }
 
+#frame-spinbox:disabled {
+    border: 2px solid #919492;
+    background-color: #919492;
+    color: #ebebeb;
+}
+
 #check-filename-settings {
-    margin-top: 15px;
+    margin-top: 10px;
 }

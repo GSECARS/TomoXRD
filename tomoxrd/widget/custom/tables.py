@@ -18,7 +18,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # ----------------------------------------------------------------------
 
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, QObject, Signal
 from qtpy.QtWidgets import (
     QWidget,
     QTableWidget,
@@ -28,15 +28,19 @@ from qtpy.QtWidgets import (
     QCheckBox,
     QHBoxLayout,
 )
-from typing import Optional
+from typing import Optional, List
 
 from tomoxrd.widget.custom import AbstractLabel, AbstractInputBox
 
 
-class AbstractTableWidget(QTableWidget):
+class AbstractTableWidget(QTableWidget, QObject):
     """
     Used to create instances of simple table widgets, with a specified number of columns.
     """
+    enabled_checkboxes_changed: Signal = Signal()
+
+    enabled_checkboxes: List[QCheckBox] = []
+    _row_counter: int = 0
 
     def __init__(
         self,
@@ -81,7 +85,7 @@ class AbstractTableWidget(QTableWidget):
 
         # Set column stretch
         if self._column_stretch is not None:
-            if self._column_stretch >= 0 and self._column_stretch <= self._columns - 1:
+            if 0 <= self._column_stretch <= self._columns - 1:
                 self.horizontalHeader().setSectionResizeMode(
                     self._column_stretch, QHeaderView.Stretch
                 )
@@ -102,37 +106,84 @@ class AbstractTableWidget(QTableWidget):
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setSelectionMode(QAbstractItemView.SingleSelection)
 
-        self.add_point()
-        self.add_point()
-        self.add_point()
+    def _check_for_available_name(self) -> None:
+        self._row_counter = 0
+        for row in range(self.rowCount() - 1):
 
-    def add_point(self) -> None:
+            self._row_counter += 1
+
+            if not f"pos{self._row_counter}" == self.item(row, 0).text():
+                return None
+
+    def _checkbox_state_changed(self, state: bool) -> None:
+        self.enabled_checkboxes_changed.emit()
+
+    def add_point(
+        self,
+        x_value: Optional[float] = None,
+        y_value: Optional[float] = None,
+        z_value: Optional[float] = None,
+    ) -> None:
 
         row = self.rowCount()
         self.setRowCount(row + 1)
 
         # Name
-        name = AbstractLabel("pos1")
-        name.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.setCellWidget(row, 0, name)
+        self._row_counter = row + 1
+        dynamic_created_name = f"pos{self._row_counter}"
+
+        if row > 0:
+            # Check if name exists
+            for existing_row in range(row):
+                if dynamic_created_name == self.item(existing_row, 0).text():
+                    temp_counter = self._row_counter
+                    self._check_for_available_name()
+                    dynamic_created_name = f"pos{self._row_counter}"
+                    self._row_counter = temp_counter
+
+        name = QTableWidgetItem(dynamic_created_name)
+        name.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.setItem(row, 0, name)
 
         # x value
-        x = AbstractInputBox(object_name="table-input")
-        x.setText("1.0300")
-        self.setCellWidget(row, 1, x)
+        if x_value is not None:
+            x = AbstractInputBox(object_name="table-input")
+            x.setText(str(x_value))
+            self.setCellWidget(row, 1, x)
 
         # y value
-        y = AbstractInputBox(object_name="table-input")
-        y.setText("1.0200")
-        self.setCellWidget(row, 2, y)
+        if y_value is not None:
+            y = AbstractInputBox(object_name="table-input")
+            y.setText(str(y_value))
+            self.setCellWidget(row, 2, y)
 
         # z value
-        z = AbstractInputBox(object_name="table-input")
-        z.setText("1.0100")
-        self.setCellWidget(row, 3, z)
+        if z_value is not None:
+            z = AbstractInputBox(object_name="table-input")
+            z.setText(str(z_value))
+            self.setCellWidget(row, 3, z)
 
         # Enabled
         checkbox = QCheckBox()
         checkbox.setChecked(True)
         checkbox.setObjectName("table-checkbox")
         self.setCellWidget(row, 4, checkbox)
+        self.enabled_checkboxes.append(checkbox)
+        checkbox.stateChanged.connect(self._checkbox_state_changed)
+
+    def delete_point(self) -> None:
+        index = self.currentRow()
+        if index >= 0:
+            self.removeRow(index)
+            del self.enabled_checkboxes[index]
+
+    def clear_points(self) -> None:
+        for row in range(self.rowCount()):
+            self.removeRow(row)
+
+        self.setRowCount(0)
+        self.enabled_checkboxes.clear()
+
+    def check_all_points(self) -> None:
+        for checkbox in self.enabled_checkboxes:
+            checkbox.setChecked(True)

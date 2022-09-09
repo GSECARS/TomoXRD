@@ -18,7 +18,7 @@
 * ---------------------------------------------------------------------- */
 
 #btn-status {
-    background: #9dedca;
+    background-color: #9dedca;
     border: 2px solid #9dedca;
     color: #323336;
     font-size: 16px;

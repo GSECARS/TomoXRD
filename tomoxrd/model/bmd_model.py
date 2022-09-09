@@ -27,7 +27,8 @@ from tomoxrd.model import PVModel, DoubleValuePV, StringValuePV, EpicsConfig
 @dataclass(frozen=True)
 class BMDModel:
 
-    path: StringValuePV = field(init=False, repr=False, compare=False)
+    detector_x: DoubleValuePV = field(init=False, repr=False, compare=False)
+    detector_z: DoubleValuePV = field(init=False, repr=False, compare=False)
 
     collection: List[PVModel] = field(
         init=False, repr=False, compare=False, default_factory=lambda: []
@@ -42,7 +43,7 @@ class BMDModel:
         movable: bool,
         limited: bool,
         rbv_extension: bool,
-        monitor: bool,
+        monitor: Optional[bool] = False,
         as_string: Optional[bool] = False,
     ) -> None:
 
@@ -70,4 +71,18 @@ class BMDModel:
         self.collection.append(getattr(self, pv_name))
 
     def _set_stages(self) -> None:
-        pass
+        # Stages
+        self._add_pv(
+            pv_name="detector_x",
+            movable=True,
+            limited=True,
+            rbv_extension=True,
+            monitor=True,
+        )
+        self._add_pv(
+            pv_name="detector_z",
+            movable=True,
+            limited=True,
+            rbv_extension=True,
+            monitor=True,
+        )

@@ -26,6 +26,7 @@ from qtpy.QtCore import QSettings, QObject, Signal
 from qtpy.QtWidgets import QApplication
 
 from tomoxrd.model import MainModel, QtWorkerModel
+from tomoxrd.controller import ScanningController, FilenameController, CollectionStatusController
 from tomoxrd.widget import MainWidget
 
 
@@ -41,6 +42,14 @@ class MainController(QObject):
         self._settings = QSettings("GSECARS", "TomoXRD")
         self._model = MainModel(settings=self._settings)
         self._widget = MainWidget(settings=self._settings, paths=self._model.paths)
+
+        self._filename_controller = FilenameController(widget=self._widget)
+        self._scanning_controller = ScanningController(
+            self._model, widget=self._widget, controller=self._filename_controller
+        )
+        self._collection_status_controller = CollectionStatusController(
+            model=self._model, widget=self._widget, controller=self._scanning_controller
+        )
 
         # Application worker thread
         self._main_worker = QtWorkerModel(self._worker_methods, ())
@@ -68,6 +77,7 @@ class MainController(QObject):
     def _worker_methods(self) -> None:
         """Runs all the worker methods."""
         while not self._widget.terminated:
+            self._collection_status_controller.update_collection_status()
             time.sleep(0.05)
 
         # Clear camonitor instances after exiting the loop

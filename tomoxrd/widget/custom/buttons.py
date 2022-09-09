@@ -18,7 +18,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # ----------------------------------------------------------------------
 
-from qtpy.QtCore import QSize
+from qtpy.QtCore import QSize, QObject, Signal
 from qtpy.QtWidgets import QPushButton, QFileDialog
 from typing import Optional
 
@@ -67,17 +67,19 @@ class AbstractFlatButton(QPushButton):
         self.clearFocus()
 
 
-class FileBrowserButton(AbstractFlatButton):
+class FileBrowserButton(AbstractFlatButton, QObject):
     """
     Used to create instances of flat buttons that open a QFileDialog to select directory.
     """
+    file_path_changed: Signal = Signal(bool)
+    folder_path_changed: Signal = Signal(bool)
 
     def __init__(
         self,
         text: Optional[str] = None,
-        signle_file: Optional[bool] = False,
+        single_file: Optional[bool] = False,
         size: Optional[QSize] = None,
-        object_name: Optional[str] = "abstract-button",
+        object_name: Optional[str] = "abstract-button"
     ) -> None:
         super(FileBrowserButton, self).__init__(
             text=text,
@@ -85,7 +87,11 @@ class FileBrowserButton(AbstractFlatButton):
             object_name=object_name,
         )
 
-        self._single_file = signle_file
+        self._single_file = single_file
+
+        self._target_directory = "C:/"
+        self._file_path = None
+        self._folder_path = None
 
     def _button_click_event(self) -> None:
         """
@@ -94,19 +100,46 @@ class FileBrowserButton(AbstractFlatButton):
         # Clear the focus state
         self.clearFocus()
 
-        file_path = None
-        folder_path = None
-
         # Open file dialog
         if not self._single_file:
-            folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
+            new_folder_path = QFileDialog.getExistingDirectory(
+                parent=self,
+                caption="Select Folder",
+                directory=self._target_directory
+            )
+            if new_folder_path != "":
+                self._folder_path = new_folder_path
+                self.folder_path_changed.emit(True)
         else:
             dialog = QFileDialog()
             dialog.setFileMode(QFileDialog.ExistingFile)
             options = QFileDialog.Options()
-            file_path, _ = QFileDialog.getOpenFileName(
+            new_file_path, _ = QFileDialog.getOpenFileName(
                 parent=self,
                 caption="Select Calibration File",
+                directory=self._target_directory,
                 filter="Par File (*.par)",
                 options=options,
             )
+            if new_file_path != "":
+                self._file_path = new_file_path
+                self.file_path_changed.emit(True)
+
+    @property
+    def target_directory(self) -> str:
+        return self._target_directory
+
+    @target_directory.setter
+    def target_directory(self, value: str) -> None:
+        invalid = '<>"\\|?*#& '
+        for char in invalid:
+            value = value.replace(char, "_")
+        self._target_directory = value
+
+    @property
+    def file_path(self) -> str:
+        return self._file_path
+
+    @property
+    def folder_path(self) -> str:
+        return self._folder_path

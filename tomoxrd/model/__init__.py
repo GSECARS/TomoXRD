@@ -22,5 +22,7 @@ from tomoxrd.model.path_model import PathModel
 from tomoxrd.model.pv_model import PVModel, DoubleValuePV, StringValuePV
 from tomoxrd.model.epics_model import EpicsModel, EpicsConfig
 from tomoxrd.model.bmd_model import BMDModel
+from tomoxrd.model.scanning_model import ScanningModel
 from tomoxrd.model.qt_worker_model import QtWorkerModel
+from tomoxrd.model.event_filter_model import EventFilterModel
 from tomoxrd.model.main_model import MainModel

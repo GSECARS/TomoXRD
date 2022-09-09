@@ -59,6 +59,7 @@ class CollectionPointsWidget(QGroupBox):
         )
 
         self._configure_collection_points_groupbox()
+        self._connect_collection_points_widgets()
         self._layout_collection_points()
 
     def _configure_collection_points_groupbox(self) -> None:
@@ -72,6 +73,12 @@ class CollectionPointsWidget(QGroupBox):
 
         # Set groupbox title
         self.setTitle(self._title)
+
+    def _connect_collection_points_widgets(self) -> None:
+        """Connects the collection points widget events."""
+        self.btn_delete.clicked.connect(self.table_points.delete_point)
+        self.btn_clear.clicked.connect(self.table_points.clear_points)
+        self.btn_check_all.clicked.connect(self.table_points.check_all_points)
 
     def _layout_collection_points(self) -> None:
         layout_points = QGridLayout()

@@ -18,4 +18,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # ----------------------------------------------------------------------
 
+from tomoxrd.controller.filename_controller import FilenameController
+from tomoxrd.controller.scanning_controller import ScanningController
+from tomoxrd.controller.collection_status_controller import CollectionStatusController
 from tomoxrd.controller.main_controller import MainController

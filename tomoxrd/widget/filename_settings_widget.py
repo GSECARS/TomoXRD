@@ -22,7 +22,7 @@ import os
 from qtpy.QtCore import QSize, Qt
 from qtpy.QtWidgets import QGroupBox, QGridLayout, QCheckBox
 
-from tomoxrd.model import PathModel
+from tomoxrd.model import PathModel, EventFilterModel
 from tomoxrd.widget.custom import (
     AbstractFlatButton,
     FileBrowserButton,
@@ -46,6 +46,7 @@ class FilenameSettingsWidget(QGroupBox):
         self._lbl_filename = AbstractLabel("Filename")
         self._lbl_path = AbstractLabel("Path")
         self._lbl_frame_number = AbstractLabel("Frame #")
+        self.lbl_calibration_path = AbstractLabel()
 
         # Input boxes
         self.ipt_filename = AbstractInputBox(size=QSize(115, 22))
@@ -60,7 +61,7 @@ class FilenameSettingsWidget(QGroupBox):
         )
         self.flb_calibration = FileBrowserButton(
             "Load Calibration",
-            signle_file=True,
+            single_file=True,
             size=QSize(200, 22),
             object_name="btn-filename-settings",
         )
@@ -76,6 +77,11 @@ class FilenameSettingsWidget(QGroupBox):
 
         # Check boxes
         self.check_chrysalis = QCheckBox("Use CrysAlis")
+        self.check_auto_reset_frames = QCheckBox("Auto Reset Frame #")
+
+        # Event filters
+        self._filename_filter = EventFilterModel(as_filepath=False)
+        self._filepath_filter = EventFilterModel(as_filepath=True)
 
         self._configure_filename_settings_groupbox()
         self._layout_filename_settings()
@@ -93,25 +99,39 @@ class FilenameSettingsWidget(QGroupBox):
         self.setTitle(self._title)
 
         # Checkbox object name
-        self.check_chrysalis.setObjectName("check-filename-settings")
+        self.check_auto_reset_frames.setObjectName("check-filename-settings")
+
+        # Set checkboxes check status
+        self.check_auto_reset_frames.setChecked(True)
+        self.check_chrysalis.setChecked(True)
+
+        # Add event filters
+        self.ipt_filename.installEventFilter(self._filename_filter)
+        self.ipt_path.installEventFilter(self._filepath_filter)
+
+        # Connect reset button
+        self.btn_reset.clicked.connect(self._reset_frame_number)
+
+    def update_frame_number(self, frame: int) -> None:
+        if frame >= 1:
+            self.spin_frame_number.setValue(frame)
+
+    def _reset_frame_number(self) -> None:
+        self.spin_frame_number.setValue(1)
 
     def _layout_filename_settings(self) -> None:
         layout = QGridLayout()
-        layout.addWidget(
-            self._lbl_filename, 0, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignRight
-        )
+        layout.addWidget(self._lbl_filename, 0, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignRight)
         layout.addWidget(self.ipt_filename, 0, 1, 1, 2)
-        layout.addWidget(
-            self._lbl_path, 1, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignRight
-        )
+        layout.addWidget(self._lbl_path, 1, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignRight)
         layout.addWidget(self.ipt_path, 1, 1, 1, 2)
         layout.addWidget(self.flb_path, 1, 3, 1, 1)
-        layout.addWidget(
-            self._lbl_frame_number, 2, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignRight
-        )
+        layout.addWidget(self._lbl_frame_number, 2, 0, 1, 1, alignment=Qt.AlignmentFlag.AlignRight)
         layout.addWidget(self.spin_frame_number, 2, 1, 1, 1)
         layout.addWidget(self.btn_reset, 2, 2, 1, 2)
-        layout.addWidget(self.check_chrysalis, 3, 0, 1, 3)
-        layout.addWidget(self.flb_calibration, 4, 0, 1, 4)
+        layout.addWidget(self.check_auto_reset_frames, 3, 0, 1, 3)
+        layout.addWidget(self.check_chrysalis, 4, 0, 1, 3)
+        layout.addWidget(self.flb_calibration, 5, 0, 1, 4)
+        layout.addWidget(self.lbl_calibration_path, 6, 0, 1, 4)
 
         self.setLayout(layout)

@@ -61,6 +61,12 @@ QLineEdit:focus {
     color: #323336;
 }
 
+QLineEdit:disabled {
+    background-color: #919492;
+    border-color: #919492;
+    color: #dbdbdb;
+}
+
 QGroupBox {
     font-family: "Calibri";
     font-weight: bold;
@@ -92,6 +98,18 @@ QCheckBox::indicator {
 
 QCheckBox::indicator:checked {
     background-color: #415d70;
+}
+
+QCheckBox:disabled {
+    color: #a6a6a6;
+}
+
+QCheckBox::indicator:checked:disabled {
+    background-color: #517085;
+}
+
+QCheckBox::indicator:disabled {
+    background-color: #ccdde8;
 }
 
 QLabel {
@@ -151,4 +169,43 @@ QScrollBar::sub-line:vertical {
 
 QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal, QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     background: none;
+}
+
+QTabWidget::pane {
+    background: #2d2d33;
+    border: 1px solid #2d2d33;
+    margin-top: 5px;
+}
+
+QTabWidget::tab-bar {
+    alignment: center;
+    background-color: blue;
+}
+
+QTabBar::tab {
+    background: #2d2d33;
+    color: #ababab;
+    font-family: "Calibri";
+    font-size: 16px;
+    height: 20px;
+    margin: 0 2px;
+    width: 65px;
+}
+
+QTabBar::tab:focus, QTabBar::tab:hover {
+    background: #8a8a8a;
+    color: #2d2d33;
+    margin: 1px;
+}
+
+QTabBar::tab:selected, QTabBar::tab:pressed {
+    background: #2d2d33;
+    border-bottom: 1px solid #ababab;
+    border-radius: 0;
+    color: #ababab;
+}
+
+QTabBar::tab:!selected {
+    border: 1px solid #2d2d33;
+    border-radius: 5px;
 }

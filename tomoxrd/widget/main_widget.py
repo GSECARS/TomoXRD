@@ -96,6 +96,9 @@ class MainWidget(QMainWindow):
         # Set central widget
         self.setCentralWidget(self._central_widget)
 
+        # Set starting focus
+        self.setFocus()
+
     def display(
         self,
         version: str,

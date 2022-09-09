@@ -31,6 +31,12 @@
     border-color: #7ea8c4;
 }
 
+#btn-points:disabled {
+    border: 2px solid #919492;
+    background-color: #919492;
+    color: #ebebeb;
+}
+
 #table-points {
     background-color: #d7dde0;
     alternate-background-color: #9dceed;
@@ -38,6 +44,11 @@
     text-align: center;
     selection-background-color: #637480;
     selection-color: #d5dde3;
+}
+
+#table-points:disabled {
+    background-color: #c6cacc;
+    alternate-background-color: #c6cacc;
 }
 
 #table-points QHeaderView::section {
@@ -49,10 +60,19 @@
     font-weight: bold;
 }
 
+#table-points QHeaderView::section:disabled {
+    background-color: #95c1de;
+    color: #4e5054;
+}
+
 #table-input {
     background-color: transparent;
     border: none;
     color: #323336;
+}
+
+#table-input:disabled {
+    color: #757678;
 }
 
 #table-input:focus {
@@ -61,4 +81,8 @@
 
 #table-checkbox {
     margin: 0 50%;
+}
+
+#table-points QLabel {
+    color: red;
 }

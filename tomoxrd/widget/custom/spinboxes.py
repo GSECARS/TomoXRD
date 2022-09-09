@@ -54,6 +54,7 @@ class NumberSpinBox(QDoubleSpinBox):
 
         self._set_min_max_values()
         self._set_single_precision_values()
+        self._set_default_value()
         self._config_spinbox()
 
     def _set_min_max_values(self) -> None:

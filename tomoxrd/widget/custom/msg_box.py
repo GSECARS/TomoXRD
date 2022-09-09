@@ -18,7 +18,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # ----------------------------------------------------------------------
 
-from qtpy.QtWidgets import QMessageBox
+from qtpy.QtWidgets import QMessageBox, QWidget
 
 
 class MsgBox(QMessageBox):
@@ -26,25 +26,5 @@ class MsgBox(QMessageBox):
 
     def __init__(self, msg: str):
         super(MsgBox, self).__init__()
-
-        self.setStyleSheet(
-            "QMessageBox, QMessageBox * {"
-            "background: #222a35;"
-            "color: #afabab;"
-            "}"
-            "QPushButton {"
-            "background: #344152;"
-            "color: #e6e6e6;"
-            "border: 1px solid #e6e6e6;"
-            "font-family: 'Times New Roman';"
-            "font-size: 16px;"
-            "border-radius: 4px;"
-            "padding: 5px 20px;"
-            "}"
-            "QPushButton:hover, QPushButton:focus {"
-            "background: #e6e6e6;"
-            "color: #344152;"
-            "}"
-        )
 
         self.critical(self, "Error", msg, QMessageBox.Ok)

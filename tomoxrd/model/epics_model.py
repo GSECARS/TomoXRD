@@ -35,13 +35,13 @@ class EpicsConnectionError(Exception):
     @property
     def message(self) -> str:
         MsgBox(msg=self._message)
-        return f"[EpicsConnectionError] - {self._message}"
+        return f"[Epics-Connection-Error] - {self._message}"
 
 
 class EpicsConfig(Enum):
     """Empty Enum to be populated with PVs"""
-
-    pass
+    detector_x = "13BMD:m121"
+    detector_z = "13BMD:m70"
 
 
 @dataclass(frozen=False)

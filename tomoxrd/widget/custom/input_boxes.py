@@ -33,6 +33,7 @@ class AbstractInputBox(QLineEdit):
         placeholder: Optional[str] = None,
         size: Optional[QSize] = None,
         object_name: Optional[str] = "abstract-input",
+        as_filepath: Optional[bool] = False,
     ) -> None:
         super(AbstractInputBox, self).__init__()
 
@@ -58,3 +59,11 @@ class AbstractInputBox(QLineEdit):
         # Set size
         if self._size is not None:
             self.setFixedSize(self._size)
+
+        # Connect return pressed event.
+        self.returnPressed.connect(self._return_pressed_event)
+
+    def _return_pressed_event(self) -> None:
+        """Clears the focus"""
+        self.clearFocus()
+

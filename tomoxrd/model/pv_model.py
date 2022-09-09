@@ -70,7 +70,7 @@ class PVModel(ABC):
         camonitor_clear(self._rbv_string)
 
 
-@dataclass
+@dataclass(slots=True)
 class DoubleValuePV(PVModel):
     """Used to interact with PVs that work with floats."""
 
@@ -87,7 +87,7 @@ class DoubleValuePV(PVModel):
         object.__setattr__(self, "readback", round(kwargs["value"], 4))
         object.__setattr__(self, "_moving", True)
 
-    def move(self, value: float, with_limits: Optional[bool] = True) -> None:
+    def move(self, value: float, with_limits: Optional[bool] = True, wait: Optional[bool] = False) -> None:
         """Moves the motor."""
 
         if not self.movable:
@@ -99,14 +99,16 @@ class DoubleValuePV(PVModel):
         if self.limited:
             if with_limits:
                 if value < caget(self.pv + ".LLM"):
-                    MsgBox(msg=f"You reach the high limit of the {self.name}.")
+                    # MsgBox(msg=f"You reach the high limit of the {self.name}.")
+                    print(f"You reach the high limit of the {self.name}.")
                     return None
                 elif value > caget(self.pv + ".HLM"):
-                    MsgBox(msg=f"You reach the low limit of the {self.name}.")
+                    # MsgBox(msg=f"You reach the low limit of the {self.name}.")
+                    print(f"You reach the low limit of the {self.name}.")
                     return None
 
         # Check if moving
-        caput(self.pv, value)
+        caput(self.pv, value, wait=wait)
 
     def set_high_limit(self, limit: float) -> None:
         if self.limited:
@@ -122,31 +124,8 @@ class DoubleValuePV(PVModel):
         self.set_high_limit(limit=high)
         self.set_low_limit(limit=low)
 
-    def set_as_offset(self) -> None:
 
-        if self.moving:
-            MsgBox(msg="Please wait for the stage to stop moving.")
-            return None
-
-        foff_string = self.pv + ".FOFF"
-        set_string = self.pv + ".SET"
-
-        # Set the .FOFF to variable
-        caput(foff_string, 0)
-
-        # Set the .SET to SET
-        caput(set_string, 1)
-
-        caput(self.pv, 0)
-
-        # Set the .SET to USE
-        caput(set_string, 0)
-
-        # Set the .FOFF to frozen
-        caput(foff_string, 1)
-
-
-@dataclass
+@dataclass(slots=True)
 class StringValuePV(PVModel):
     """Used to interact with PVs that work with strings."""
 
