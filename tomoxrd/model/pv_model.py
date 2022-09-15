@@ -87,7 +87,7 @@ class DoubleValuePV(PVModel):
         object.__setattr__(self, "readback", round(kwargs["value"], 4))
         object.__setattr__(self, "_moving", True)
 
-    def move(self, value: float, with_limits: Optional[bool] = True, wait: Optional[bool] = False) -> None:
+    def move(self, value: float, with_limits: Optional[bool] = True, wait: Optional[bool] = False, timeout: Optional[float] = None) -> None:
         """Moves the motor."""
 
         if not self.movable:
@@ -107,8 +107,12 @@ class DoubleValuePV(PVModel):
                     print(f"You reach the low limit of the {self.name}.")
                     return None
 
-        # Check if moving
-        caput(self.pv, value, wait=wait)
+        if timeout is not None:
+            # Check if moving
+            caput(self.pv, value, wait=wait, timeout=timeout)
+        else:
+            # Check if moving
+            caput(self.pv, value, wait=wait)
 
     def set_high_limit(self, limit: float) -> None:
         if self.limited:

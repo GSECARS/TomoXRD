@@ -31,5 +31,9 @@ QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
 # Version number based on git tags
 __version__ = _version.get_versions()["version"]
 
+# Change to static version for executable versions in order to display the correct software title
+if __version__ == "0+unknown":
+    __version__ = "0.0.2"
+
 # Application controller
 app = MainController()
