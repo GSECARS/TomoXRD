@@ -25,4 +25,5 @@ from tomoxrd.model.bmd_model import BMDModel
 from tomoxrd.model.scanning_model import ScanningModel
 from tomoxrd.model.qt_worker_model import QtWorkerModel
 from tomoxrd.model.event_filter_model import EventFilterModel
+from tomoxrd.model.detector_settings_model import DetectorSettingsModel
 from tomoxrd.model.main_model import MainModel

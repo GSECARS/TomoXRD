@@ -25,6 +25,7 @@ from tomoxrd.model import (
     PathModel,
     EpicsModel,
     BMDModel,
+    DetectorSettingsModel,
     ScanningModel,
 )
 
@@ -39,9 +40,11 @@ class MainModel:
     epics: EpicsModel = field(init=False, repr=False, compare=False)
     bmd: BMDModel = field(init=False, repr=False, compare=False)
     scanning: ScanningModel = field(init=False, repr=False, compare=False)
+    detector_settings: DetectorSettingsModel = field(init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "paths", PathModel())
         object.__setattr__(self, "epics", EpicsModel())
         object.__setattr__(self, "bmd", BMDModel())
+        object.__setattr__(self, "detector_settings", DetectorSettingsModel(settings=self.settings))
         object.__setattr__(self, "scanning", ScanningModel())

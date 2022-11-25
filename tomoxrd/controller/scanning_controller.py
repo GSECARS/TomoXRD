@@ -34,12 +34,6 @@ class ScanningController(QObject):
     current_collection_changed: Signal = Signal(int)
     estimated_time_changed: Signal = Signal(float)
 
-    tomo_x = -127.0
-    tomo_z = 50.0
-    xrd_x = 95.0
-    xrd_z = 0.0
-    detector_out = 100.0
-
     _horizontal_motor: str = "13BMD:m123"
     _vertical_motor: str = "13BMD:m115"
     _focus_motor: str = "13BMD:m122"

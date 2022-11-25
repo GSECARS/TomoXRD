@@ -17,8 +17,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # ----------------------------------------------------------------------
 
-numpy==1.23.1
+numpy==1.23.5
 pyepics==3.5.1
 PyQt5==5.15.7
-pywin32==304
-QtPy==2.1.0
+pywin32==305
+QtPy==2.3.0
+cryio==2018.5.30

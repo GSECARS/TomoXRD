@@ -22,4 +22,5 @@ from tomoxrd.widget.filename_settings_widget import FilenameSettingsWidget
 from tomoxrd.widget.collection_settings_widget import CollectionSettingsWidget
 from tomoxrd.widget.collection_points_widget import CollectionPointsWidget
 from tomoxrd.widget.collection_status_widget import CollectionStatusWidget
+from tomoxrd.widget.detector_settings_widget import DetectorSettingsWidget
 from tomoxrd.widget.main_widget import MainWidget

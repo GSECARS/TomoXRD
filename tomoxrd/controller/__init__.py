@@ -19,6 +19,7 @@
 # ----------------------------------------------------------------------
 
 from tomoxrd.controller.filename_controller import FilenameController
+from tomoxrd.controller.detector_settings_controller import DetectorSettingsController
 from tomoxrd.controller.scanning_controller import ScanningController
 from tomoxrd.controller.collection_status_controller import CollectionStatusController
 from tomoxrd.controller.main_controller import MainController

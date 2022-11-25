@@ -82,15 +82,15 @@ class CollectionStatusController(QObject):
 
             # Move the detector out
             if not self._move_tomo_aborted:
-                self._model.bmd.detector_z.move(self._controller.detector_out, wait=True, timeout=300.0)
+                self._model.bmd.detector_z.move(self._model.detector_settings.detector_out, wait=True, timeout=300.0)
 
-            if self._model.bmd.detector_z.readback == self._controller.detector_out:
+            if self._model.bmd.detector_z.readback == self._model.detector_settings.detector_out:
                 # Move detector_x to the tomo position
                 if not self._move_tomo_aborted:
-                    self._model.bmd.detector_x.move(self._controller.tomo_x, wait=True, timeout=300.0)
+                    self._model.bmd.detector_x.move(self._model.detector_settings.tomo_x, wait=True, timeout=300.0)
                 # Move detector_z to the tomo position
                 if not self._move_tomo_aborted:
-                    self._model.bmd.detector_z.move(self._controller.tomo_z, wait=True, timeout=300.0)
+                    self._model.bmd.detector_z.move(self._model.detector_settings.tomo_z, wait=True, timeout=300.0)
         else:
             self._model.scanning.error_message_changed.emit("Can't move to tomo when the shutter is open!!!")
 
@@ -130,15 +130,15 @@ class CollectionStatusController(QObject):
         if not self._controller.shutter_is_open():
             # Move the detector out
             if not self._move_tomo_aborted:
-                self._model.bmd.detector_z.move(self._controller.detector_out, wait=True, timeout=300.0)
+                self._model.bmd.detector_z.move(self._model.detector_settings.detector_out, wait=True, timeout=300.0)
 
-            if self._model.bmd.detector_z.readback == self._controller.detector_out:
+            if self._model.bmd.detector_z.readback == self._model.detector_settings.detector_out:
                 # Move detector_x to the XRD position
                 if not self._move_xrd_aborted:
-                    self._model.bmd.detector_x.move(self._controller.xrd_x, wait=True, timeout=300.0)
+                    self._model.bmd.detector_x.move(self._model.detector_settings.xrd_x, wait=True, timeout=300.0)
                 # Move detector_z to the XRD position
                 if not self._move_xrd_aborted:
-                    self._model.bmd.detector_z.move(self._controller.xrd_z, wait=True, timeout=300.0)
+                    self._model.bmd.detector_z.move(self._model.detector_settings.xrd_z, wait=True, timeout=300.0)
         else:
             self._model.scanning.error_message_changed.emit("Can't move to XRD when the shutter is open!!!")
 

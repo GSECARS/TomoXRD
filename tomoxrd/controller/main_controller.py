@@ -26,7 +26,12 @@ from qtpy.QtCore import QSettings, QObject, Signal
 from qtpy.QtWidgets import QApplication
 
 from tomoxrd.model import MainModel, QtWorkerModel
-from tomoxrd.controller import ScanningController, FilenameController, CollectionStatusController
+from tomoxrd.controller import (
+    DetectorSettingsController,
+    ScanningController,
+    FilenameController,
+    CollectionStatusController,
+)
 from tomoxrd.widget import MainWidget
 
 
@@ -43,6 +48,7 @@ class MainController(QObject):
         self._model = MainModel(settings=self._settings)
         self._widget = MainWidget(settings=self._settings, paths=self._model.paths)
 
+        self._detector_controller = DetectorSettingsController(widget=self._widget, model=self._model)
         self._filename_controller = FilenameController(widget=self._widget)
         self._scanning_controller = ScanningController(
             self._model, widget=self._widget, controller=self._filename_controller
