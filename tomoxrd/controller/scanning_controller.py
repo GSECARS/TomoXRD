@@ -312,7 +312,7 @@ class ScanningController(QObject):
         current_x = self._model.bmd.detector_x.readback
         current_z = self._model.bmd.detector_z.readback
 
-        if current_x == self.xrd_x and current_z == self.xrd_z:
+        if current_x == self._model.detector_settings.xrd_x and current_z == self._model.detector_settings.xrd_z:
             return True
         return False
 
