@@ -33,7 +33,7 @@ __version__ = _version.get_versions()["version"]
 
 # Change to static version for executable versions in order to display the correct software title
 if __version__ == "0+unknown":
-    __version__ = "0.0.2"
+    __version__ = "0.0.3"
 
 # Application controller
 app = MainController()
