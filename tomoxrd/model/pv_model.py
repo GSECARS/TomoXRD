@@ -20,10 +20,9 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from epics import caget, caput, camonitor, camonitor_clear
 from typing import Optional
 
-from tomoxrd.widget.custom import MsgBox
+from epics import caget, camonitor, camonitor_clear, caput
 
 
 @dataclass(frozen=False)
@@ -87,7 +86,13 @@ class DoubleValuePV(PVModel):
         object.__setattr__(self, "readback", round(kwargs["value"], 4))
         object.__setattr__(self, "_moving", True)
 
-    def move(self, value: float, with_limits: Optional[bool] = True, wait: Optional[bool] = False, timeout: Optional[float] = None) -> None:
+    def move(
+        self,
+        value: float,
+        with_limits: Optional[bool] = True,
+        wait: Optional[bool] = False,
+        timeout: Optional[float] = None,
+    ) -> None:
         """Moves the motor."""
 
         if not self.movable:

@@ -21,9 +21,10 @@
 import math
 import os.path
 import time
+from typing import Optional
+
 import numpy as np
 from epics import caget, caput
-from typing import Optional
 from qtpy.QtCore import QObject, Signal
 
 from tomoxrd.widget.custom import MsgBox
@@ -44,24 +45,24 @@ class ScanningModel(QObject):
     _aborted: bool = False
 
     # Detector PVs
-    _detector_exposure: str = "13PIL1MCdTe:cam1:AcquireTime"
-    _detector_acquire: str = "13PIL1MCdTe:cam1:Acquire"
-    _detector_armed: str = "13PIL1MCdTe:cam1:Armed"
-    _detector_num_images: str = "13PIL1MCdTe:cam1:NumImages"
-    _detector_trigger: str = "13PIL1MCdTe:cam1:TriggerMode"
-    _detector_arr_counter: str = "13PIL1MCdTe:cam1:ArrayCounter"
-    _detector_file_template: str = "13PIL1MCdTe:cam1:FileTemplate"
-    _detector_file_name: str = "13PIL1MCdTe:cam1:FileName"
-    _detector_file_number: str = "13PIL1MCdTe:cam1:FileNumber"
-    _detector_file_path: str = "13PIL1MCdTe:cam1:FilePath"
+    _detector_exposure: str = "13PIL3:cam1:AcquireTime"
+    _detector_acquire: str = "13PIL3:cam1:Acquire"
+    _detector_armed: str = "13PIL3:cam1:Armed"
+    _detector_num_images: str = "13PIL3:cam1:NumImages"
+    _detector_trigger: str = "13PIL3:cam1:TriggerMode"
+    _detector_arr_counter: str = "13PIL3:cam1:ArrayCounter"
+    _detector_file_template: str = "13PIL3:cam1:FileTemplate"
+    _detector_file_name: str = "13PIL3:cam1:FileName"
+    _detector_file_number: str = "13PIL3:cam1:FileNumber"
+    _detector_file_path: str = "13PIL3:cam1:FilePath"
 
-    _tiff_file_template: str = "13PIL1MCdTe:TIFF1:FileTemplate"
-    _tiff_file_number: str = "13PIL1MCdTe:TIFF1:FileNumber"
-    _tiff_file_name: str = "13PIL1MCdTe:TIFF1:FileName"
+    _tiff_file_template: str = "13PIL3:TIFF1:FileTemplate"
+    _tiff_file_number: str = "13PIL3:TIFF1:FileNumber"
+    _tiff_file_name: str = "13PIL3:TIFF1:FileName"
 
-    _recursive_filter_number = "13PIL1MCdTe:Proc1:NumFilter"
-    _recursive_filter_type = "13PIL1MCdTe:Proc1:FilterType"
-    _recursive_filter_enable = "13PIL1MCdTe:Proc1:EnableFilter"
+    _recursive_filter_number = "13PIL3:Proc1:NumFilter"
+    _recursive_filter_type = "13PIL3:Proc1:FilterType"
+    _recursive_filter_enable = "13PIL3:Proc1:EnableFilter"
 
     # PSO PVs
     _pso_axis: str = "13BMDPG1:TS:PSOAxisName"
@@ -76,9 +77,9 @@ class ScanningModel(QObject):
 
     _theta: str = "13BMD:m119"
     _theta_stop: str = "13BMDPG1:TS:RotationStop"
-    _base_path: str = "T:/dac_user/2022/BMD_2022-3/Tomo"
-    _tiff_file_path: str = "13PIL1MCdTe:TIFF1:FilePath"
-    _shutter: str = "13BMD:Unidig2Bo10"  # 1: Open, 0: Close
+    _base_path: str = "T:/dac_user/2025/BMD_2025-3/Tomo"
+    _tiff_file_path: str = "13PIL3:TIFF1:FilePath"
+    _shutter: str = "13BMD:Unidig2Bo10"  # 1: Open, 0: Close  # TODO: Update PV when connected to 13BMD:Shutter
 
     _start_position: float = None
     _end_position: float = None
@@ -116,7 +117,9 @@ class ScanningModel(QObject):
         self._max_speed = caget(self._theta + ".VMAX")
 
         # Set init PSO values
-        caput(self._pso_command_out, f"UNITSTOCOUNTS({self._pso_axis}, 360.0)", wait=True)
+        caput(
+            self._pso_command_out, f"UNITSTOCOUNTS({self._pso_axis}, 360.0)", wait=True
+        )
         reply = caget(self._pso_command_in, as_string=True)
         counts_per_rotation = float(reply[1:])
         caput(self._pso_counts_per_rotation, counts_per_rotation)
@@ -145,12 +148,18 @@ class ScanningModel(QObject):
         """
         if self._rotation_step > 0:
             if not self._wide_scan:
-                distance = math.ceil(self._accel_dist / self._rotation_step + 0.5) * self._rotation_step
+                distance = (
+                    math.ceil(self._accel_dist / self._rotation_step + 0.5)
+                    * self._rotation_step
+                )
             else:
                 distance = math.ceil(self._accel_dist + (self._accel_dist * 0.001))
         else:
             if not self._wide_scan:
-                distance = math.floor(self._accel_dist / self._rotation_step - 0.5) * self._rotation_step
+                distance = (
+                    math.floor(self._accel_dist / self._rotation_step - 0.5)
+                    * self._rotation_step
+                )
             else:
                 distance = math.ceil(self._accel_dist - (self._accel_dist * 0.001))
         return distance
@@ -173,7 +182,9 @@ class ScanningModel(QObject):
         # Compute the actual delta to keep each interval an integer number of encoder counts
         encoder_multiply = float(caget(self._pso_counts_per_rotation)) / 360.0
         delta = abs(self._end_position - self._start_position)
-        encoder_counts = self._calculate_encoder_counts(modifier=encoder_multiply, delta=delta)
+        encoder_counts = self._calculate_encoder_counts(
+            modifier=encoder_multiply, delta=delta
+        )
 
         # Change the rotation step
         self._rotation_step = encoder_counts / encoder_multiply
@@ -189,7 +200,10 @@ class ScanningModel(QObject):
 
         # Set the taxi distance
         taxi_dist = self._calculate_taxi_distance()
-        caput(self._pso_start_taxi, self._start_position - taxi_dist * self._user_direction)
+        caput(
+            self._pso_start_taxi,
+            self._start_position - taxi_dist * self._user_direction,
+        )
 
         # Calculate the last point
         caput(self._pso_end_taxi, self._end_position)
@@ -202,35 +216,66 @@ class ScanningModel(QObject):
         # Make sure the PSO control is off
         caput(self._pso_command_out, f"PSOCONTROL {self._pso_axis} RESET", wait=True)
         # Set the output to occur from the I/O terminal on the controller
-        caput(self._pso_command_out, f"PSOOUTPUT {self._pso_axis} CONTROL 0 1", wait=True)
+        caput(
+            self._pso_command_out, f"PSOOUTPUT {self._pso_axis} CONTROL 0 1", wait=True
+        )
         # Set the pulse width.  The total width and active width are the same, since this is a single pulse.
         pulse_width = caget(self._pso_pulse_width)
-        caput(self._pso_command_out, f"PSOPULSE {self._pso_axis} TIME {pulse_width},{pulse_width}", wait=True)
+        caput(
+            self._pso_command_out,
+            f"PSOPULSE {self._pso_axis} TIME {pulse_width},{pulse_width}",
+            wait=True,
+        )
         # Set the pulses to only occur in a specific window
-        caput(self._pso_command_out, f"PSOOUTPUT {self._pso_axis} PULSE WINDOW MASK", wait=True)
+        caput(
+            self._pso_command_out,
+            f"PSOOUTPUT {self._pso_axis} PULSE WINDOW MASK",
+            wait=True,
+        )
         # Set which encoder we will use.  3 = the MXH (encoder multiplier) input, which is what we generally want
-        caput(self._pso_command_out, f"PSOTRACK {self._pso_axis} INPUT {pso_input}", wait=True)
+        caput(
+            self._pso_command_out,
+            f"PSOTRACK {self._pso_axis} INPUT {pso_input}",
+            wait=True,
+        )
         # Set the distance between pulses. Do this in encoder counts.
         encoder_counts_per_step = int(np.abs(caget(self._pso_counts_per_step)))
         fixed_encoder_counts = 1
         if not self._wide_scan:
-            caput(self._pso_command_out, f"PSODISTANCE {self._pso_axis} FIXED {encoder_counts_per_step}", wait=True)
+            caput(
+                self._pso_command_out,
+                f"PSODISTANCE {self._pso_axis} FIXED {encoder_counts_per_step}",
+                wait=True,
+            )
         else:
             # Convert acceleration distance to encoder counts and set as PSODISTANCE fixed
             encoder_multiply = float(caget(self._pso_counts_per_rotation)) / 360.0
             fixed_encoder_counts = int(
-                round(math.ceil(self._accel_dist + (self._accel_dist * 0.001)) * encoder_multiply)
+                round(
+                    math.ceil(self._accel_dist + (self._accel_dist * 0.001))
+                    * encoder_multiply
+                )
             )
-            caput(self._pso_command_out, f"PSODISTANCE {self._pso_axis} FIXED {fixed_encoder_counts}", wait=True)
+            caput(
+                self._pso_command_out,
+                f"PSODISTANCE {self._pso_axis} FIXED {fixed_encoder_counts}",
+                wait=True,
+            )
 
         # Which encoder is being used to calculate whether we are in the window.  1 for single axis
-        caput(self._pso_command_out, f"PSOWINDOW {self._pso_axis} 1 INPUT {pso_input}", wait=True)
+        caput(
+            self._pso_command_out,
+            f"PSOWINDOW {self._pso_axis} 1 INPUT {pso_input}",
+            wait=True,
+        )
 
         # Calculate window function parameters.  Must be in encoder counts, and is
         # referenced from the stage location where we arm the PSO.  We are at that point now.
         # We want pulses to start at start - delta/2, end at end + delta/2.
         if not self._wide_scan:
-            range_start = -round(np.abs(encoder_counts_per_step) / 2) * self._overall_sense
+            range_start = (
+                -round(np.abs(encoder_counts_per_step) / 2) * self._overall_sense
+            )
             range_length = np.abs(encoder_counts_per_step) * self._num_angles
         else:
             range_start = -fixed_encoder_counts * self._overall_sense
@@ -246,7 +291,7 @@ class ScanningModel(QObject):
         caput(
             self._pso_command_out,
             f"PSOWINDOW {self._pso_axis} 1 RANGE {window_start - 5},{window_end + 5}",
-            wait=True
+            wait=True,
         )
 
     def _prepare_detector(self) -> None:
@@ -280,7 +325,10 @@ class ScanningModel(QObject):
                 self._file_number = caget(self._detector_file_number)
                 caput(self._detector_file_number, self._frame_number, wait=True)
                 # Sets the detector file path for .cbf collection
-                caput(self._detector_file_path, caget(self._tiff_file_path, as_string=True))
+                caput(
+                    self._detector_file_path,
+                    caget(self._tiff_file_path, as_string=True),
+                )
                 # Set the n filtered
                 caput(self._recursive_filter_number, self._num_angles, wait=True)
                 # Enable the filter
@@ -355,14 +403,14 @@ class ScanningModel(QObject):
         self._cbf_collection = state
 
     def prepare_scan(
-            self,
-            start: float,
-            end: float,
-            exposure: float,
-            frame: int,
-            filename: str,
-            filepath: str,
-            step: Optional[float] = None,
+        self,
+        start: float,
+        end: float,
+        exposure: float,
+        frame: int,
+        filename: str,
+        filepath: str,
+        step: Optional[float] = None,
     ) -> bool:
         self.scan_is_running.emit(True)
         self._is_running = True
@@ -385,10 +433,14 @@ class ScanningModel(QObject):
             taxi_start = caget(self._pso_start_taxi)
 
             if taxi_start < low_limit or end < low_limit:
-                self.error_message_changed.emit(f"You have reached the low limit of the {self._theta}.")
+                self.error_message_changed.emit(
+                    f"You have reached the low limit of the {self._theta}."
+                )
                 limited = True
             if taxi_start > high_limit or end > high_limit:
-                self._model.error_message_changed.emit(f"You have reached the high limit of the {self._theta}.")
+                self._model.error_message_changed.emit(
+                    f"You have reached the high limit of the {self._theta}."
+                )
                 limited = True
 
             if step is None:
@@ -423,7 +475,11 @@ class ScanningModel(QObject):
         self._previous_tiff_filename = caget(self._tiff_file_name)
         self._previous_detector_filepath = caget(self._detector_file_path)
         self._previous_detector_filename = caget(self._detector_file_name)
-        caput(self._tiff_file_path, next_filepath.replace(self._base_path, "/DAC"), wait=True)
+        caput(
+            self._tiff_file_path,
+            next_filepath.replace(self._base_path, "/DAC"),
+            wait=True,
+        )
 
         self._prepare_detector()
 

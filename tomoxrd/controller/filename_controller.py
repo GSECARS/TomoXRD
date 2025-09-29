@@ -20,15 +20,15 @@
 import collections
 import os
 import shutil
+
 import numpy as np
+from cryio import cbfimage, crysalis, esperanto
 from epics import caget
-from cryio import cbfimage, esperanto, crysalis
 
 from tomoxrd.widget import MainWidget
 
 
 class CBFNotFoundError(Exception):
-
     def __init__(self, msg) -> None:
         super(CBFNotFoundError, self).__init__()
         self.msg = msg
@@ -36,10 +36,10 @@ class CBFNotFoundError(Exception):
 
 class FilenameController:
     # PVs
-    _tiff_file_number: str = "13PIL1MCdTe:TIFF1:FileNumber"
-    _tiff_file_name: str = "13PIL1MCdTe:TIFF1:FileName"
-    _tiff_file_path: str = "13PIL1MCdTe:TIFF1:FilePath"
-    _base_path: str = "T:/dac_user/2022/BMD_2022-3/Tomo"
+    _tiff_file_number: str = "13PIL3:TIFF1:FileNumber"
+    _tiff_file_name: str = "13PIL3:TIFF1:FileName"
+    _tiff_file_path: str = "13PIL3:TIFF1:FilePath"
+    _base_path: str = "T:/dac_user/2025/BMD_2025-3/Tomo"
 
     # File paths
     _set_filepath: str = "T:/dac_user/Setup/Crysalis/pilatus_1m.set"
@@ -52,13 +52,19 @@ class FilenameController:
     def __init__(self, widget: MainWidget) -> None:
         self._widget = widget
 
-        current_user_path = caget(self._tiff_file_path, as_string=True).replace("/DAC", self._base_path)
+        current_user_path = caget(self._tiff_file_path, as_string=True).replace(
+            "/DAC", self._base_path
+        )
         if current_user_path[-1] != "/":
             current_user_path += "/"
         self._widget.filename_settings.ipt_path.setText(current_user_path)
         self._widget.filename_settings.flb_path.target_directory = self._base_path
-        self._widget.filename_settings.flb_calibration.target_directory = self._base_path
-        self._widget.filename_settings.lbl_calibration_path.setText(self._par_filepath.split("/")[-1])
+        self._widget.filename_settings.flb_calibration.target_directory = (
+            self._base_path
+        )
+        self._widget.filename_settings.lbl_calibration_path.setText(
+            self._par_filepath.split("/")[-1]
+        )
 
         self._scans[0] = [
             {
@@ -84,7 +90,7 @@ class FilenameController:
                 "l12": 0.2952,
                 "b": 0.2952,
                 "mono": 0.99,
-                "monotype": 'SYNCHROTRON',
+                "monotype": "SYNCHROTRON",
                 "chip": [1044, 1044],
                 "Exposure_time": 0.5,
             }
@@ -105,16 +111,26 @@ class FilenameController:
         self._widget.filename_settings.spin_frame_number.setValue(file_number)
 
     def _connect_filename_settings_widgets(self) -> None:
-        self._widget.filename_settings.ipt_filename.returnPressed.connect(self._update_file_name)
-        self._widget.filename_settings.ipt_path.returnPressed.connect(self._update_file_path)
-        self._widget.filename_settings.flb_path.folder_path_changed.connect(self._change_existing_path)
-        self._widget.filename_settings.flb_calibration.file_path_changed.connect(self._par_file_path_changed)
+        self._widget.filename_settings.ipt_filename.returnPressed.connect(
+            self._update_file_name
+        )
+        self._widget.filename_settings.ipt_path.returnPressed.connect(
+            self._update_file_path
+        )
+        self._widget.filename_settings.flb_path.folder_path_changed.connect(
+            self._change_existing_path
+        )
+        self._widget.filename_settings.flb_calibration.file_path_changed.connect(
+            self._par_file_path_changed
+        )
 
     def _par_file_path_changed(self, state: bool) -> None:
         if state:
             new_par_path = self._widget.filename_settings.flb_calibration.file_path
             self._par_filepath = new_par_path
-            self._widget.filename_settings.lbl_calibration_path.setText(new_par_path.split("/")[-1])
+            self._widget.filename_settings.lbl_calibration_path.setText(
+                new_par_path.split("/")[-1]
+            )
 
     def _update_file_name(self) -> None:
         filename = self._widget.filename_settings.ipt_filename.text()
@@ -147,7 +163,9 @@ class FilenameController:
                 current_path += "/"
             self._widget.filename_settings.ipt_path.returnPressed.disconnect()
             self._widget.filename_settings.ipt_path.setText(current_path)
-            self._widget.filename_settings.ipt_path.returnPressed.connect(self._update_file_path)
+            self._widget.filename_settings.ipt_path.returnPressed.connect(
+                self._update_file_path
+            )
 
     @staticmethod
     def create_esperanto_directory(filepath: str, filename: str) -> None:
@@ -170,8 +188,12 @@ class FilenameController:
 
     def copy_set_and_ccd_files(self, filepath: str, filename: str) -> None:
         target_directory = os.path.join(filepath, f"{filename}_crys").replace("\\", "/")
-        shutil.copy(self._set_filepath, os.path.join(target_directory, f"{filename}.set")).replace("\\", "/")
-        shutil.copy(self._ccd_filepath, os.path.join(target_directory, f"{filename}.ccd")).replace("\\", "/")
+        shutil.copy(
+            self._set_filepath, os.path.join(target_directory, f"{filename}.set")
+        ).replace("\\", "/")
+        shutil.copy(
+            self._ccd_filepath, os.path.join(target_directory, f"{filename}.ccd")
+        ).replace("\\", "/")
 
     @staticmethod
     def convert_to_square(images_array: np.ndarray) -> np.ndarray:
@@ -188,14 +210,13 @@ class FilenameController:
         return np.vstack((converted_images, c))
 
     def prepare_for_crysalis(
-            self,
-            num_angles: int,
-            start: float,
-            end: float,
-            step: float,
-            exposure: float,
+        self,
+        num_angles: int,
+        start: float,
+        end: float,
+        step: float,
+        exposure: float,
     ) -> None:
-
         self._scans[0][0]["count"] = num_angles
         self._scans[0][0]["omega_start"] = start
         self._scans[0][0]["omega_end"] = end
@@ -203,16 +224,22 @@ class FilenameController:
         self._scans[0][0]["Exposure_time"] = exposure
 
     def convert_to_esperanto(
-            self,
-            filepath: str,
-            filename: str,
-            num_angles: int,
+        self,
+        filepath: str,
+        filename: str,
+        num_angles: int,
     ) -> None:
         target_directory = os.path.join(filepath, f"{filename}_crys").replace("\\", "/")
 
-        for i in range(int(self.starting_frame - 1), int(self.starting_frame + num_angles - 1), 1):
-            cbf_file = os.path.join(filepath, filename + "_{0:04d}".format(i + 1) + ".cbf").replace("\\", "/")
-            esperanto_file = os.path.join(target_directory, f"{filename}_1_{i + 1}.esperanto").replace("\\", "/")
+        for i in range(
+            int(self.starting_frame - 1), int(self.starting_frame + num_angles - 1), 1
+        ):
+            cbf_file = os.path.join(
+                filepath, filename + "_{0:04d}".format(i + 1) + ".cbf"
+            ).replace("\\", "/")
+            esperanto_file = os.path.join(
+                target_directory, f"{filename}_1_{i + 1}.esperanto"
+            ).replace("\\", "/")
 
             try:
                 if not os.path.exists(cbf_file):
@@ -224,12 +251,13 @@ class FilenameController:
                 eps_target_image = self.convert_to_square(trans_image)
 
                 kwargs = self._scans[0][0]
-                kwargs['omega'] = kwargs['omega_start'] + kwargs['domega'] * i
+                kwargs["omega"] = kwargs["omega_start"] + kwargs["domega"] * i
 
-                esperanto.EsperantoImage().save(esperanto_file, eps_target_image, **kwargs)
+                esperanto.EsperantoImage().save(
+                    esperanto_file, eps_target_image, **kwargs
+                )
 
     def create_crysalis_exp_settings_file(self, filepath: str, filename: str) -> None:
-
         target_directory = os.path.join(filepath, f"{filename}_crys").replace("\\", "/")
 
         run_header = crysalis.RunHeader(filename.encode(), target_directory.encode(), 1)
@@ -238,13 +266,13 @@ class FilenameController:
 
         for omega_run in self._scans[0]:
             dscr = crysalis.RunDscr(0)
-            dscr.axis = crysalis.SCAN_AXIS['OMEGA']
-            dscr.kappa = omega_run['kappa']
+            dscr.axis = crysalis.SCAN_AXIS["OMEGA"]
+            dscr.kappa = omega_run["kappa"]
             dscr.omegaphi = 0
-            dscr.start = omega_run['omega_start']
-            dscr.end = omega_run['omega_end']
-            dscr.width = omega_run['domega']
-            dscr.todo = dscr.done = omega_run['count']
+            dscr.start = omega_run["omega_start"]
+            dscr.end = omega_run["omega_end"]
+            dscr.width = omega_run["domega"]
+            dscr.todo = dscr.done = omega_run["count"]
             dscr.exposure = 1
             run_file.append(dscr)
 

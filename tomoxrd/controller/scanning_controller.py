@@ -20,13 +20,14 @@
 import datetime
 import threading
 import time
-import numpy as np
-from qtpy.QtCore import QObject, Signal
-from epics import caget, caput
 from typing import Optional
 
-from tomoxrd.model import MainModel
+import numpy as np
+from epics import caget, caput
+from qtpy.QtCore import QObject, Signal
+
 from tomoxrd.controller import FilenameController
+from tomoxrd.model import MainModel
 from tomoxrd.widget import MainWidget
 
 
@@ -37,7 +38,7 @@ class ScanningController(QObject):
     _horizontal_motor: str = "13BMD:m123"
     _vertical_motor: str = "13BMD:m115"
     _focus_motor: str = "13BMD:m122"
-    _shutter: str = "13BMD:Unidig2Bo10"  # 1: Open, 0: Close
+    _shutter: str = "13BMD:Unidig2Bo10"  # 1: Open, 0: Close  # TODO: Update PV when connected to 13BMD:Shutter
 
     _previous_horiz_pos: float = None
     _previous_vert_pos: float = None
@@ -51,7 +52,9 @@ class ScanningController(QObject):
     _current_row: int = 0
     _start_time: datetime.datetime
 
-    def __init__(self, model: MainModel, widget: MainWidget, controller: FilenameController) -> None:
+    def __init__(
+        self, model: MainModel, widget: MainWidget, controller: FilenameController
+    ) -> None:
         super(ScanningController, self).__init__()
 
         self._model = model
@@ -64,14 +67,28 @@ class ScanningController(QObject):
 
     def _connect_methods(self) -> None:
         self.current_collection_changed.connect(self._update_current_collection)
-        self._model.scanning.status_message_changed.connect(self._widget.collection_status.update_status_message)
-        self._model.scanning.scan_is_running.connect(self._widget.collection_status.toggle_collect_abort_button)
+        self._model.scanning.status_message_changed.connect(
+            self._widget.collection_status.update_status_message
+        )
+        self._model.scanning.scan_is_running.connect(
+            self._widget.collection_status.toggle_collect_abort_button
+        )
         self._model.scanning.scan_is_running.connect(self._disable_gui_while_collecting)
-        self._model.scanning.trigger_esperanto_creation.connect(self._create_esperanto_files)
-        self._widget.collection_status.btn_collect_abort.clicked.connect(self._collect_abort_btn)
-        self._model.scanning.frame_number_changed.connect(self._widget.filename_settings.update_frame_number)
-        self._model.scanning.total_frames_changed.connect(self._update_status_total_frames)
-        self._model.scanning.frame_counter_changed.connect(self._update_status_current_frames)
+        self._model.scanning.trigger_esperanto_creation.connect(
+            self._create_esperanto_files
+        )
+        self._widget.collection_status.btn_collect_abort.clicked.connect(
+            self._collect_abort_btn
+        )
+        self._model.scanning.frame_number_changed.connect(
+            self._widget.filename_settings.update_frame_number
+        )
+        self._model.scanning.total_frames_changed.connect(
+            self._update_status_total_frames
+        )
+        self._model.scanning.frame_counter_changed.connect(
+            self._update_status_current_frames
+        )
         self._widget.collection_settings.combo_collection_type.currentIndexChanged.connect(
             lambda: self._update_total_frames()
         )
@@ -87,20 +104,36 @@ class ScanningController(QObject):
         self._widget.collection_settings.spin_exposure.valueChanged.connect(
             lambda: self._update_estimated_time()
         )
-        self._widget.filename_settings.check_chrysalis.stateChanged.connect(self._model.scanning.toggle_cbf_collection)
-        self._widget.collection_points.btn_add.clicked.connect(self._add_collection_point)
-        self._widget.collection_points.btn_clear.clicked.connect(lambda: self._update_total_collections(1))
-        self._widget.collection_points.btn_add.clicked.connect(lambda: self._update_total_collections(
-            self._total_collections + 1
-        ))
-        self._widget.collection_points.btn_delete.clicked.connect(lambda: self._update_total_collections(
-            self._total_collections - 1
-        ))
-        self._widget.collection_points.btn_check_all.clicked.connect(lambda: self._update_estimated_time)
-        self._widget.collection_points.table_points.enabled_checkboxes_changed.connect(self._iterate_collections)
-        self.estimated_time_changed.connect(self._widget.collection_status.update_estimated_time_widget)
-        self._widget.collection_settings.combo_collection_type.currentIndexChanged.connect(self._toggle_checkbox_status)
-        self._model.scanning.error_message_changed.connect(self._model.scanning.create_error_message)
+        self._widget.filename_settings.check_chrysalis.stateChanged.connect(
+            self._model.scanning.toggle_cbf_collection
+        )
+        self._widget.collection_points.btn_add.clicked.connect(
+            self._add_collection_point
+        )
+        self._widget.collection_points.btn_clear.clicked.connect(
+            lambda: self._update_total_collections(1)
+        )
+        self._widget.collection_points.btn_add.clicked.connect(
+            lambda: self._update_total_collections(self._total_collections + 1)
+        )
+        self._widget.collection_points.btn_delete.clicked.connect(
+            lambda: self._update_total_collections(self._total_collections - 1)
+        )
+        self._widget.collection_points.btn_check_all.clicked.connect(
+            lambda: self._update_estimated_time
+        )
+        self._widget.collection_points.table_points.enabled_checkboxes_changed.connect(
+            self._iterate_collections
+        )
+        self.estimated_time_changed.connect(
+            self._widget.collection_status.update_estimated_time_widget
+        )
+        self._widget.collection_settings.combo_collection_type.currentIndexChanged.connect(
+            self._toggle_checkbox_status
+        )
+        self._model.scanning.error_message_changed.connect(
+            self._model.scanning.create_error_message
+        )
 
     def shutter_is_open(self) -> bool:
         """Checks if the shutter is open."""
@@ -109,7 +142,10 @@ class ScanningController(QObject):
         return False
 
     def _toggle_checkbox_status(self) -> None:
-        if self._widget.collection_settings.combo_collection_type.currentText() == "Step":
+        if (
+            self._widget.collection_settings.combo_collection_type.currentText()
+            == "Step"
+        ):
             self._widget.filename_settings.check_chrysalis.setEnabled(True)
             self._widget.filename_settings.check_auto_reset_frames.setEnabled(True)
         else:
@@ -129,59 +165,60 @@ class ScanningController(QObject):
                 start=self._widget.collection_settings.spin_omega_range_start.value(),
                 end=self._widget.collection_settings.spin_omega_range_end.value(),
                 step=self._widget.collection_settings.spin_step_size.value(),
-                exposure=self._widget.collection_settings.spin_exposure.value()
+                exposure=self._widget.collection_settings.spin_exposure.value(),
             )
 
         if not self._model.scanning.aborted:
             self._controller.create_esperanto_directory(
-                filepath=filepath + filename,
-                filename=filename
+                filepath=filepath + filename, filename=filename
             )
 
         if not self._model.scanning.aborted:
             self._controller.copy_set_and_ccd_files(
-                filepath=filepath + filename,
-                filename=filename
+                filepath=filepath + filename, filename=filename
             )
 
         if not self._model.scanning.aborted:
             self._controller.create_crysalis_exp_settings_file(
-                filepath=filepath + filename,
-                filename=filename
+                filepath=filepath + filename, filename=filename
             )
 
         if not self._model.scanning.aborted:
             self._controller.create_par_file(
-                filepath=filepath + filename,
-                filename=filename
+                filepath=filepath + filename, filename=filename
             )
 
         if not self._model.scanning.aborted:
             self._controller.convert_to_esperanto(
                 filepath=filepath + filename,
                 filename=filename,
-                num_angles=self._model.scanning.total_frames
+                num_angles=self._model.scanning.total_frames,
             )
 
         self._model.scanning.creating_esperanto = False
 
     def _create_esperanto_files(self) -> None:
-        esperanto_creator_thread = threading.Thread(target=self._esperanto_creator, args=())
+        esperanto_creator_thread = threading.Thread(
+            target=self._esperanto_creator, args=()
+        )
 
         collection_points = self._widget.collection_points.table_points.rowCount()
         if collection_points < 1:
             esperanto_creator_thread.start()
         else:
-            if self._widget.collection_points.table_points.enabled_checkboxes[self._current_row].isChecked():
+            if self._widget.collection_points.table_points.enabled_checkboxes[
+                self._current_row
+            ].isChecked():
                 esperanto_creator_thread.start()
 
     def _update_total_collections(self, collections_number: int) -> None:
-
         if self._widget.collection_points.table_points.rowCount() <= 1:
             self._total_collections = 1
         else:
             self._total_collections = collections_number
-        self._widget.collection_status.lbl_collections.setText(f"0/{self._total_collections} Collections")
+        self._widget.collection_status.lbl_collections.setText(
+            f"0/{self._total_collections} Collections"
+        )
         self._update_estimated_time()
 
     def _iterate_collections(self) -> None:
@@ -200,7 +237,10 @@ class ScanningController(QObject):
         self._update_estimated_time()
 
     def _update_total_frames(self) -> None:
-        if self._widget.collection_settings.combo_collection_type.currentText() == "Step":
+        if (
+            self._widget.collection_settings.combo_collection_type.currentText()
+            == "Step"
+        ):
             start = self._widget.collection_settings.spin_omega_range_start.value()
             end = self._widget.collection_settings.spin_omega_range_end.value()
             step = self._widget.collection_settings.spin_step_size.value()
@@ -216,7 +256,9 @@ class ScanningController(QObject):
         if frame_number > self._model.scanning.total_frames:
             frame_number = self._model.scanning.total_frames
 
-        self._widget.collection_status.lbl_frames.setText(f"{frame_number}/{self._model.scanning.total_frames} Frames")
+        self._widget.collection_status.lbl_frames.setText(
+            f"{frame_number}/{self._model.scanning.total_frames} Frames"
+        )
 
     def disable_gui_while_moving_to_tomo(self, state: bool) -> None:
         self._widget.collection_status.btn_collect_abort.setEnabled(not state)
@@ -234,12 +276,15 @@ class ScanningController(QObject):
         self._widget.collection_status.btn_prepare_for_xrd.setEnabled(not state)
 
         if not state:
-            if self._widget.collection_settings.combo_collection_type.currentText() == "Step":
+            if (
+                self._widget.collection_settings.combo_collection_type.currentText()
+                == "Step"
+            ):
                 # Check if auto reset frame is selected
                 if self._widget.filename_settings.check_auto_reset_frames.isChecked():
                     self._widget.filename_settings.spin_frame_number.setValue(1)
             else:
-                frame = int(caget("13PIL1MCdTe:TIFF1:FileNumber"))
+                frame = int(caget("13PIL3:TIFF1:FileNumber"))
                 self._widget.filename_settings.spin_frame_number.setValue(frame)
 
             if self._widget.collection_points.table_points.rowCount() < 1:
@@ -248,15 +293,20 @@ class ScanningController(QObject):
 
     def _collect_abort_btn(self) -> None:
         if self._widget.collection_status.btn_collect_abort.text() == "Collect":
-
             exposure = self._widget.collection_settings.spin_exposure.value()
             start = self._widget.collection_settings.spin_omega_range_start.value()
             end = self._widget.collection_settings.spin_omega_range_end.value()
             step = self._widget.collection_settings.spin_step_size.value()
 
-            if self._widget.collection_settings.combo_collection_type.currentText() == "Still":
+            if (
+                self._widget.collection_settings.combo_collection_type.currentText()
+                == "Still"
+            ):
                 self.collect(exposure=exposure)
-            elif self._widget.collection_settings.combo_collection_type.currentText() == "Wide":
+            elif (
+                self._widget.collection_settings.combo_collection_type.currentText()
+                == "Wide"
+            ):
                 self.collect(exposure=exposure, start=start, end=end)
             else:
                 self.collect(exposure=exposure, start=start, end=end, step=step)
@@ -267,7 +317,9 @@ class ScanningController(QObject):
         x = round(caget(self._horizontal_motor), 4)
         y = round(caget(self._vertical_motor), 4)
         z = round(caget(self._focus_motor), 4)
-        self._widget.collection_points.table_points.add_point(x_value=x, y_value=y, z_value=z)
+        self._widget.collection_points.table_points.add_point(
+            x_value=x, y_value=y, z_value=z
+        )
         self._update_estimated_time()
 
     def _compute_estimated_time(self) -> float:
@@ -277,7 +329,10 @@ class ScanningController(QObject):
         step = self._widget.collection_settings.spin_step_size.value()
 
         # TODO: Need to include the delay of epics wait=True usage.
-        if self._widget.collection_settings.combo_collection_type.currentText() == "Step":
+        if (
+            self._widget.collection_settings.combo_collection_type.currentText()
+            == "Step"
+        ):
             time_estimate = round(np.abs(end - start) / step) * exposure
             # Add existing delay for step scans
             time_estimate += 2
@@ -297,7 +352,9 @@ class ScanningController(QObject):
             total_estimate = self._compute_estimated_time()
         else:
             for row in range(collection_points):
-                if self._widget.collection_points.table_points.enabled_checkboxes[row].isChecked():
+                if self._widget.collection_points.table_points.enabled_checkboxes[
+                    row
+                ].isChecked():
                     total_estimate += self._compute_estimated_time()
 
         self.estimated_time_changed.emit(total_estimate)
@@ -306,7 +363,9 @@ class ScanningController(QObject):
         while self._model.scanning.is_running or self._multiple_collection_running:
             time.sleep(0.1)
             elapsed_time = (datetime.datetime.now() - self._start_time).total_seconds()
-            self._widget.collection_status.update_elapsed_time_widget(seconds=elapsed_time)
+            self._widget.collection_status.update_elapsed_time_widget(
+                seconds=elapsed_time
+            )
 
     def _on_xrd_position(self) -> bool:
         current_x = self._model.bmd.detector_x.readback
@@ -326,16 +385,17 @@ class ScanningController(QObject):
         return False
 
     def collect(
-            self,
-            exposure: float,
-            start: Optional[float] = None,
-            end: Optional[float] = None,
-            step: Optional[float] = None
+        self,
+        exposure: float,
+        start: Optional[float] = None,
+        end: Optional[float] = None,
+        step: Optional[float] = None,
     ) -> None:
-
         if not self._on_xrd_position():
             self._model.scanning.scan_is_running.emit(False)
-            self._model.scanning.error_message_changed.emit("First move to XRD position.")
+            self._model.scanning.error_message_changed.emit(
+                "First move to XRD position."
+            )
             return None
 
         if self._step_is_larger_than_range():
@@ -347,45 +407,63 @@ class ScanningController(QObject):
 
         # Set initial filenames
         file_name = self._widget.filename_settings.ipt_filename.text()
-        caput("13PIL1MCdTe:TIFF1:FileName", file_name, wait=True)
-        caput("13PIL1MCdTe:cam1:FileName", file_name, wait=True)
-        self._controller.starting_frame = self._widget.filename_settings.spin_frame_number.value()
+        caput("13PIL3:TIFF1:FileName", file_name, wait=True)
+        caput("13PIL3:cam1:FileName", file_name, wait=True)
+        self._controller.starting_frame = (
+            self._widget.filename_settings.spin_frame_number.value()
+        )
         # Check if there are collection points listed before starting the collection
         if self._widget.collection_points.table_points.rowCount() < 1:
-            self._collect_single_point(exposure=exposure, start=start, end=end, step=step)
+            self._collect_single_point(
+                exposure=exposure, start=start, end=end, step=step
+            )
         else:
-            multiple_points_scan = threading.Thread(target=self._collect_multiple_points, args=(
-                exposure, start, end, step))
+            multiple_points_scan = threading.Thread(
+                target=self._collect_multiple_points, args=(exposure, start, end, step)
+            )
             if not self._model.scanning.aborted:
                 multiple_points_scan.start()
 
         # Elapsed time thread
-        elapsed_time_thread = threading.Thread(target=self._compute_elapsed_time, args=())
+        elapsed_time_thread = threading.Thread(
+            target=self._compute_elapsed_time, args=()
+        )
         # Start the elapsed time thread
         self._start_time = datetime.datetime.now()
         elapsed_time_thread.start()
 
     def _collect_single_point(
-            self,
-            exposure: float,
-            start: Optional[float] = None,
-            end: Optional[float] = None,
-            step: Optional[float] = None
+        self,
+        exposure: float,
+        start: Optional[float] = None,
+        end: Optional[float] = None,
+        step: Optional[float] = None,
     ) -> None:
         """Starts the step fly scan collection."""
         # Set the starting frame for crysalis
         if self._widget.filename_settings.check_chrysalis.isChecked():
-            if self._widget.collection_settings.combo_collection_type.currentText() == "Step":
+            if (
+                self._widget.collection_settings.combo_collection_type.currentText()
+                == "Step"
+            ):
                 self._widget.filename_settings.spin_frame_number.setValue(1)
-                self._controller.starting_frame = self._widget.filename_settings.spin_frame_number.value()
+                self._controller.starting_frame = (
+                    self._widget.filename_settings.spin_frame_number.value()
+                )
 
         next_frame = self._widget.filename_settings.spin_frame_number.value()
         filename = self._widget.filename_settings.ipt_filename.text()
         filepath = self._widget.filename_settings.ipt_path.text()
 
         limited = self._model.scanning.prepare_scan(
-            start=start, end=end, exposure=exposure, step=step,
-            frame=next_frame, filename=filename, filepath=filepath)
+            start=start,
+            end=end,
+            exposure=exposure,
+            step=step,
+            frame=next_frame,
+            filename=filename,
+            filepath=filepath,
+        )
 
         if limited:
             self.abort()
@@ -396,7 +474,9 @@ class ScanningController(QObject):
         if start is None or end is None:
             scan = threading.Thread(target=self._model.scanning.collect_still, args=())
         else:
-            scan = threading.Thread(target=self._model.scanning.collect_projections, args=())
+            scan = threading.Thread(
+                target=self._model.scanning.collect_projections, args=()
+            )
 
         if not self._model.scanning.aborted:
             # Update current collection number
@@ -404,11 +484,11 @@ class ScanningController(QObject):
             scan.start()
 
     def _collect_multiple_points(
-            self,
-            exposure: float,
-            start: Optional[float] = None,
-            end: Optional[float] = None,
-            step: Optional[float] = None
+        self,
+        exposure: float,
+        start: Optional[float] = None,
+        end: Optional[float] = None,
+        step: Optional[float] = None,
     ) -> None:
         self._multiple_collection_aborted = False
         self._multiple_collection_running = True
@@ -427,22 +507,36 @@ class ScanningController(QObject):
             if self._multiple_collection_aborted:
                 break
 
-            if self._widget.collection_points.table_points.enabled_checkboxes[row].isChecked():
-
+            if self._widget.collection_points.table_points.enabled_checkboxes[
+                row
+            ].isChecked():
                 # Set the starting frame
                 if self._widget.filename_settings.check_chrysalis.isChecked():
-                    if self._widget.collection_settings.combo_collection_type.currentText() == "Step":
+                    if (
+                        self._widget.collection_settings.combo_collection_type.currentText()
+                        == "Step"
+                    ):
                         self._widget.filename_settings.spin_frame_number.setValue(1)
-                        self._controller.starting_frame = self._widget.filename_settings.spin_frame_number.value()
+                        self._controller.starting_frame = (
+                            self._widget.filename_settings.spin_frame_number.value()
+                        )
 
                 # Update current collection number
                 collection_number += 1
                 self.current_collection_changed.emit(collection_number)
                 # Scan point
-                point_name = self._widget.collection_points.table_points.item(row, 0).text()
-                x_text = self._widget.collection_points.table_points.cellWidget(row, 1).text()
-                y_text = self._widget.collection_points.table_points.cellWidget(row, 2).text()
-                z_text = self._widget.collection_points.table_points.cellWidget(row, 3).text()
+                point_name = self._widget.collection_points.table_points.item(
+                    row, 0
+                ).text()
+                x_text = self._widget.collection_points.table_points.cellWidget(
+                    row, 1
+                ).text()
+                y_text = self._widget.collection_points.table_points.cellWidget(
+                    row, 2
+                ).text()
+                z_text = self._widget.collection_points.table_points.cellWidget(
+                    row, 3
+                ).text()
                 x = float(x_text) if x_text else self._previous_horiz_pos
                 y = float(y_text) if y_text else self._previous_vert_pos
                 z = float(z_text) if z_text else self._previous_focus_pos
@@ -457,8 +551,13 @@ class ScanningController(QObject):
                 filepath = self._widget.filename_settings.ipt_path.text()
 
                 limited = self._model.scanning.prepare_scan(
-                    start=start, end=end, exposure=exposure, step=step,
-                    frame=next_frame, filename=filename, filepath=filepath
+                    start=start,
+                    end=end,
+                    exposure=exposure,
+                    step=step,
+                    frame=next_frame,
+                    filename=filename,
+                    filepath=filepath,
                 )
                 if limited:
                     self.abort()
@@ -486,7 +585,12 @@ class ScanningController(QObject):
         self._model.scanning.scan_is_running.emit(False)
         self._model.scanning.status_message_changed.emit("Finished")
 
-    def _move_to_point(self, x: Optional[float] = None, y: Optional[float] = None, z: Optional[float] = None) -> bool:
+    def _move_to_point(
+        self,
+        x: Optional[float] = None,
+        y: Optional[float] = None,
+        z: Optional[float] = None,
+    ) -> bool:
         """Moves the stages to the collection point positions to prepare for the collection."""
 
         self._model.scanning.scan_is_running.emit(True)
@@ -517,10 +621,14 @@ class ScanningController(QObject):
         if value is None:
             return True
         if value < caget(pv + ".LLM"):
-            self._model.scanning.error_message_changed.emit(f"You have reached the low limit of the {pv}.")
+            self._model.scanning.error_message_changed.emit(
+                f"You have reached the low limit of the {pv}."
+            )
             return False
         if value > caget(pv + ".HLM"):
-            self._model.scanning.error_message_changed.emit(f"You have reached the high limit of the {pv}.")
+            self._model.scanning.error_message_changed.emit(
+                f"You have reached the high limit of the {pv}."
+            )
             return False
         return True
 
